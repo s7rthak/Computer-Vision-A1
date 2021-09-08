@@ -38,16 +38,15 @@ def baseline_bgs(args):
     eval_start, eval_end = (int(val) for val in lines_list[0].split())
 
     backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15)
+    backSub2 = cv2.createBackgroundSubtractorKNN()
 
     for i in range(1, BASELINE_FRAMES+1):
-        frame_name = "in" + str(i).zfill(6) + ".jpg"
-
+        frame_name = "/in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
-
-        fgMask = backSub.apply(frame)
+        fgMask = backSub2.apply(frame)
 
         if i >= eval_start and i <= eval_end:
-            pred_name = "gt" + str(i).zfill(6) + ".png"
+            pred_name = "/gt" + str(i).zfill(6) + ".png"
             cv2.imwrite(args.out_path + pred_name, fgMask)
 
 
