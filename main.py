@@ -27,9 +27,28 @@ JITTER_FRAMES = 1150
 DYNAMIC_FRAMES = 1189
 PTZ_FRAMES = 1130
 
+dataset_dir = "COL780-A1-Data/"
+
 def baseline_bgs(args):
-    #TODO complete this function
-    pass
+    os.makedirs(args.out_path, exist_ok=True)
+
+    file_handle = open(args.eval_frames, 'r')
+    lines_list = file_handle.readlines()
+
+    eval_start, eval_end = (int(val) for val in lines_list[0].split())
+
+    backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15)
+
+    for i in range(1, BASELINE_FRAMES+1):
+        frame_name = "in" + str(i).zfill(6) + ".jpg"
+
+        frame = cv2.imread(args.inp_path + frame_name)
+
+        fgMask = backSub.apply(frame)
+
+        if i >= eval_start and i <= eval_end:
+            pred_name = "gt" + str(i).zfill(6) + ".png"
+            cv2.imwrite(args.out_path + pred_name, fgMask)
 
 
 def illumination_bgs(args):
