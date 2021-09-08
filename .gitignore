@@ -1,3 +1,6 @@
+# Ignore large dataset
+COL780-A1-Data
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
