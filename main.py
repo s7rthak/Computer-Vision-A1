@@ -28,6 +28,7 @@ DYNAMIC_FRAMES = 1189
 PTZ_FRAMES = 1130
 
 dataset_dir = "COL780-A1-Data/"
+kernel = np.ones((5,5),np.uint8)
 
 def baseline_bgs(args):
     os.makedirs(args.out_path, exist_ok=True)
@@ -36,19 +37,24 @@ def baseline_bgs(args):
     lines_list = file_handle.readlines()
 
     eval_start, eval_end = (int(val) for val in lines_list[0].split())
+    file_handle.close()
 
-    backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15)
+    backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
+    backSub2 = cv2.createBackgroundSubtractorKNN()
 
     for i in range(1, BASELINE_FRAMES+1):
         frame_name = "in" + str(i).zfill(6) + ".jpg"
 
         frame = cv2.imread(args.inp_path + frame_name)
 
-        fgMask = backSub.apply(frame)
+        bilateral = cv2.bilateralFilter(frame, 15, 75, 75)
+        fgMask = backSub2.apply(bilateral)
+        closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
+        opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
 
         if i >= eval_start and i <= eval_end:
             pred_name = "gt" + str(i).zfill(6) + ".png"
-            cv2.imwrite(args.out_path + pred_name, fgMask)
+            cv2.imwrite(args.out_path + pred_name, opening)
 
 
 def illumination_bgs(args):
