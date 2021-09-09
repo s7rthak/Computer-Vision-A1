@@ -28,7 +28,7 @@ DYNAMIC_FRAMES = 1189
 PTZ_FRAMES = 1130
 
 dataset_dir = "COL780-A1-Data/"
-kernel = np.ones((5,5),np.uint8)
+kernel = np.ones((7,7),np.uint8)
 
 def baseline_bgs(args):
     os.makedirs(args.out_path, exist_ok=True)
@@ -43,11 +43,11 @@ def baseline_bgs(args):
     backSub2 = cv2.createBackgroundSubtractorKNN()
 
     for i in range(1, BASELINE_FRAMES+1):
-        frame_name = "/in" + str(i).zfill(6) + ".jpg"
+        frame_name = "in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
 
-        bilateral = cv2.bilateralFilter(frame, 15, 75, 75)
-        fgMask = backSub2.apply(bilateral)
+        gaussian = cv2.GaussianBlur(frame,(3,3),0)
+        fgMask = backSub2.apply(gaussian)
         closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
         opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
 
