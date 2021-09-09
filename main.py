@@ -43,8 +43,7 @@ def baseline_bgs(args):
     backSub2 = cv2.createBackgroundSubtractorKNN()
 
     for i in range(1, BASELINE_FRAMES+1):
-        frame_name = "in" + str(i).zfill(6) + ".jpg"
-
+        frame_name = "/in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
 
         bilateral = cv2.bilateralFilter(frame, 15, 75, 75)
