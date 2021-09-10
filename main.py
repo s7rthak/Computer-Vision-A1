@@ -50,10 +50,13 @@ def baseline_bgs(args):
         fgMask = backSub2.apply(gaussian)
         closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
         opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
+        res = cv2.GaussianBlur(opening,(3,3),0)
+        opening2 = cv2.morphologyEx(res, cv2.MORPH_OPEN, kernel)
+        closing2 = cv2.morphologyEx(opening2, cv2.MORPH_CLOSE, kernel)
 
         if i >= eval_start and i <= eval_end:
             pred_name = "gt" + str(i).zfill(6) + ".png"
-            cv2.imwrite(args.out_path + pred_name, opening)
+            cv2.imwrite(args.out_path + pred_name, closing2)
 
 
 def illumination_bgs(args):

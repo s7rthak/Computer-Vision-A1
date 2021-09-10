@@ -32,14 +32,11 @@ def main(args):
     # Keep only the masks for eval frames in <pred_path> and not the background (all zero) frames.
     filenames = os.listdir(args.pred_path)
     ious = []
-    print(args.pred_path)
     for filename in filenames:
         pred_mask = cv2.imread(os.path.join(args.pred_path, filename))
         gt_mask = cv2.imread(os.path.join(args.gt_path, filename))
         iou = binary_mask_iou(gt_mask, pred_mask)
         ious.append(iou)
-        if iou == 0:
-            print(filename)
     print("mIOU: %.4f"%(sum(ious)/len(ious)))
     
 
