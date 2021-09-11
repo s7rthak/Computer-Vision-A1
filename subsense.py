@@ -1,8 +1,13 @@
 import numpy as np
 import cv2
+import os
+from multiprocessing import Pool
 
 def intensity(frame, x, y):
     return 0.0722 * frame[x, y, 0] + 0.7152 * frame[x, y, 1] + 0.2126 * frame[x, y, 2]
+
+def intensity_vec(frame):
+    return 0.0722 * frame[:, :, 0] + 0.7152 * frame[:, :, 1] + 0.2126 * frame[:, :, 2]
 
 def lbsp_per_pixel(frame, threshold, x, y):
     h, w, c = frame.shape
@@ -73,10 +78,9 @@ def compute_lbsp(frame, threshold):
     LBSP = np.zeros((h, w), dtype=int)
     I = np.zeros((h, w), dtype=int)
 
-    for i in range(h):
-        for j in range(w):
-            LBSP[i, j] = lbsp_per_pixel(frame, threshold, i, j)
-            I[i, j] = intensity(frame, i, j)
+    pool = Pool(os.cpu_count())
+    LBSP = np.array(pool.starmap(lbsp_per_pixel, [(frame, threshold, i, j) for i in range(h) for j in range(w)])).reshape((h,w))
+    I = intensity_vec(frame)
 
     return LBSP, I
 
