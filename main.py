@@ -6,7 +6,7 @@ import os
 import cv2
 import argparse
 import numpy as np
-
+import subsense
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Get mIOU of video sequences')
@@ -37,26 +37,31 @@ def baseline_bgs(args):
     lines_list = file_handle.readlines()
 
     eval_start, eval_end = (int(val) for val in lines_list[0].split())
+    eval_start = 10
     file_handle.close()
 
     backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
     backSub2 = cv2.createBackgroundSubtractorKNN()
+    backSub3 = subsense.Subsense(5, 2, 10, 2, 100)
 
     for i in range(1, BASELINE_FRAMES+1):
+        print(i)
         frame_name = "in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
 
-        gaussian = cv2.GaussianBlur(frame,(3,3),0)
-        fgMask = backSub2.apply(gaussian)
-        closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
-        opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
-        res = cv2.GaussianBlur(opening,(3,3),0)
-        opening2 = cv2.morphologyEx(res, cv2.MORPH_OPEN, kernel)
-        closing2 = cv2.morphologyEx(opening2, cv2.MORPH_CLOSE, kernel)
+        # gaussian = cv2.GaussianBlur(frame,(3,3),0)
+        # fgMask = backSub2.apply(gaussian)
+        # closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
+        # opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
+        # res = cv2.GaussianBlur(opening,(3,3),0)
+        # opening2 = cv2.morphologyEx(res, cv2.MORPH_OPEN, kernel)
+        # closing2 = cv2.morphologyEx(opening2, cv2.MORPH_CLOSE, kernel)
 
         if i >= eval_start and i <= eval_end:
             pred_name = "gt" + str(i).zfill(6) + ".png"
-            cv2.imwrite(args.out_path + pred_name, closing2)
+            cv2.imwrite(args.out_path + pred_name, backSub3.apply(frame))
+        else:
+            backSub3.apply(frame)
 
 
 def illumination_bgs(args):
