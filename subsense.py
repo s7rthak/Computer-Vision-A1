@@ -81,9 +81,9 @@ def compute_lbsp(frame, threshold):
 
     pool = Pool(os.cpu_count())
     LBSP = np.array(pool.starmap(lbsp_per_pixel, [(frame, threshold, i, j) for i in range(h) for j in range(w)])).reshape((h,w))
-    I = intensity_vec(frame)
+    # I = intensity_vec(frame)
 
-    return LBSP, I
+    return LBSP, frame
 
 def f(x):
     return bin(x).count("1")
@@ -138,7 +138,7 @@ class Subsense:
         # Set r-values
         r_color = self.r * self.r_color_0
         r_lbsp = np.power(np.full((self.h, self.w), 2.0), self.r) + self.r_lbsp_0
-        print(self.r)
+        print(self.t)
 
         self.curr_segmentation = np.full((self.h, self.w), 1)
         curr_lbsp, curr_intensity = compute_lbsp(img, 0.3)
@@ -151,21 +151,22 @@ class Subsense:
         matches = np.zeros((self.h, self.w), dtype=int)
         for i in range(len(self.background_models)):
             lbsp_diff = hamming_distance_vec(self.background_models[i][0], curr_lbsp)
-            intensity_diff = np.absolute(self.background_models[i][1] - curr_intensity)
+            # intensity_diff = np.absolute(self.background_models[i][1] - curr_intensity)
+            intensity_diff = np.amax(np.absolute(self.background_models[i][1] - curr_intensity), axis=2)
             d_max = np.maximum(d_max, intensity_diff)
             d_min = np.minimum(d_min, intensity_diff)
 
-            fg_mask = np.logical_or(np.greater_equal(lbsp_diff, r_lbsp), np.greater_equal(intensity_diff, r_color))
-            curr_match = np.where(fg_mask, 1, 0)
+            bg_mask = np.logical_and(r_lbsp > lbsp_diff, r_color > intensity_diff)
+            curr_match = np.where(bg_mask, 0, 1)
             matches = matches + curr_match
 
-        # print(matches)
+        print(matches)
 
         # For all pixel positions, if number of matches is greater than n_min, then declare as background else it is foreground.
-        self.curr_segmentation = np.where(matches < self.n_min, 0, 1)
+        self.curr_segmentation = np.where(matches >= self.n_min, 0, 1)
 
         # Decide the pixels where we want to update models.
-        update = np.random.binomial(1, 1/(self.t+1e-6))
+        update = np.random.binomial(1, 1/(self.t))
         update_mask = np.logical_and(update == 1, self.curr_segmentation == 0)
 
         update_model = np.full((self.h, self.w), -1)
@@ -176,6 +177,16 @@ class Subsense:
             x, y = update_pixel_coordinates[i][0], update_pixel_coordinates[i][1]
             k = update_model[x, y]
             self.background_models[k][0][x, y], self.background_models[k][1][x, y] = curr_lbsp[x, y], curr_intensity[x, y]
+
+            ran2 = np.random.binomial(1, 1/self.t[x, y])
+
+            if ran2 == 1:
+                ran = random.randint(0, 1)
+                if ran == 0:
+                    self.background_models[k-1][0][x, y], self.background_models[k-1][1][x, y] = curr_lbsp[x, y], curr_intensity[x, y]
+                else:
+                    self.background_models[(k+1)%len(self.background_models)][0][x, y], self.background_models[(k+1)%len(self.background_models)][1][x, y] = curr_lbsp[x, y], curr_intensity[x, y]
+                
                 
         #Now for updates
         self.d_min = (1 - self.learn_rate) * self.d_min + self.learn_rate * d_min/(d_max+1e-6)

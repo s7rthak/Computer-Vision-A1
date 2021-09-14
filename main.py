@@ -42,7 +42,7 @@ def baseline_bgs(args):
 
     backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
     backSub2 = cv2.createBackgroundSubtractorKNN()
-    backSub3 = subsense.Subsense(5, 2, 10, 2, 100)
+    backSub3 = subsense.Subsense(5, 1, 16, 2, 100)
 
     for i in range(1, BASELINE_FRAMES+1):
         print(i)
