@@ -166,7 +166,7 @@ class Subsense:
         self.curr_segmentation = np.where(matches >= self.n_min, 0, 1)
 
         # Decide the pixels where we want to update models.
-        update = np.random.binomial(1, 1/(self.t))
+        update = np.random.binomial(1, 1.0)
         update_mask = np.logical_and(update == 1, self.curr_segmentation == 0)
 
         update_model = np.full((self.h, self.w), -1)
