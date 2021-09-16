@@ -8,7 +8,7 @@ kernel = np.ones((5,5),np.uint8)
 
 def pre_process(frame):
     fr = cv2.GaussianBlur(frame,(3,3),0)
-    fr = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    fr = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
 
     return fr
 
