@@ -54,7 +54,7 @@ for i in range(1, BASELINE_FRAMES+1):
     if not res is None:
         # res = post_process(res, 20)
         cv2.imshow("image", frame)
-        cv2.imshow("fg", mask)
+        cv2.imshow("fg", res)
         cv2.imshow("flow", bgr)
 
     keyboard = cv2.waitKey(30)
