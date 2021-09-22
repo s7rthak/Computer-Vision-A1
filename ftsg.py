@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 BASELINE_FRAMES = 1700
-input_path = "COL780-A1-Data/ptz/input/"
+input_path = "COL780-A1-Data/illumination/input/"
 kernel = np.ones((5,5),np.uint8)
 
 def pre_process(frame):
@@ -12,7 +12,7 @@ def pre_process(frame):
 
     return fr
 
-def post_process(frame, th = 20):
+def post_process(frame, th = 10):
     fr = cv2.GaussianBlur(frame,(3,3),0)
     ret, fr = cv2.threshold(fr, th, 255, cv2.THRESH_BINARY)
     fr = cv2.morphologyEx(fr, cv2.MORPH_CLOSE, kernel)
@@ -21,7 +21,7 @@ def post_process(frame, th = 20):
     return fr
 
 
-backSubtractor = cv2.createBackgroundSubtractorKNN()
+backSubtractor = cv2.createBackgroundSubtractorMOG2()
 
 frame1 = cv2.imread(input_path + "in" + str(1).zfill(6) + ".jpg")
 prvs = pre_process(frame1)
@@ -34,8 +34,8 @@ for i in range(1, BASELINE_FRAMES+1):
     next = pre_process(frame2)
 
     fgmask = post_process(backSubtractor.apply(next))
-
-    flow = cv2.calcOpticalFlowFarneback(prvs, next, None, 0.5, 7, 15, 3, 7, 1.5, 0)
+    # cv2.optflow.DualTVL1OpticalFlow_create()
+    flow = cv2.calcOpticalFlowFarneback(prvs, next, None, 0.5, 10, 20, 3, 7, 1.5, 0)
     mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
     hsv[...,0] = ang*180/np.pi/2
     hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)

@@ -5,7 +5,8 @@ import os
 from multiprocessing import Pool
 
 def intensity(frame, x, y):
-    return 0.0722 * frame[x, y, 0] + 0.7152 * frame[x, y, 1] + 0.2126 * frame[x, y, 2]
+    # return 0.0722 * frame[x, y, 0] + 0.7152 * frame[x, y, 1] + 0.2126 * frame[x, y, 2]
+    return frame[x, y]
 
 def intensity_vec(frame):
     return 0.0722 * frame[:, :, 0] + 0.7152 * frame[:, :, 1] + 0.2126 * frame[:, :, 2]

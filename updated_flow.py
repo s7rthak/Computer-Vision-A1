@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+
 BASELINE_FRAMES = 1700
 input_path = "illumination/input/"
 
@@ -99,31 +100,11 @@ def mask2image(mask):
     m = (mask * 255).astype(np.uint8)
     return cv2.cvtColor(m, cv2.COLOR_GRAY2RGB)
 
+def mask2gray(mask):
+    return (mask * 255).astype(np.uint8)
+
 def setMaskOntoImage(mask, img):
     mask = mask.reshape(img.shape[0], img.shape[1], 1)
     res = img * mask
     res = res.astype(np.uint8)
     return res
-
-of = OpticalFlow()
-bg = ModelBackground()
-
-for i in range(1, BASELINE_FRAMES+1):
-   frame2 = cv2.imread(input_path + "in" + str(i).zfill(6) + ".jpg")   
-   of.insert_image(frame2)
-   flow_magnitude = of.compute_optical_flow()
-   mask_of = of.get_mask_of_moving()
-   bg.insert_image(frame2)
-        # bg_img = bg.get_background_image()
-   mask_bg = bg.get_mask_of_foreground(frame2)
-   mask2 = (mask_bg * mask_of)**(0.9)
-   img_disp_combine = np.hstack( (frame2, mask2image( mask2 ),setMaskOntoImage(mask2, frame2) ))
-
-   img_disp =np.hstack( (frame2, mask2image( mask_of )))
-   cv2.imshow("optical flow", img_disp)
-        # Waitkey
-   q = cv2.waitKey(1)
-   if q!=-1 and chr(q) == 'q':
-       break
-  
-cv2.destroyAllWindows()
