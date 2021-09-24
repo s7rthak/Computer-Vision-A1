@@ -71,14 +71,28 @@ def illumination_bgs(args):
 
 
 def jitter_bgs(args):
-    os.makedirs(args.out_path, exist_ok=True)
-    file_handle = open(args.eval_frames, 'r')
-    lines_list = file_handle.readlines()
+     os.makedirs(args.out_path, exist_ok=True)
+     file_handle = open(args.eval_frames, 'r')
+     lines_list = file_handle.readlines()
+     
+     eval_start, eval_end = (int(val) for val in lines_list[0].split())
+     file_handle.close()
+     backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
+     backSub2 = cv2.createBackgroundSubtractorKNN()
+     
+     for i in range(1, BASELINE_FRAMES+1):
+        frame_name = "in" + str(i).zfill(6) + ".jpg"
+        frame = cv2.imread(args.inp_path + frame_name)
 
-    test.eval_start, test.eval_end = (int(val) for val in lines_list[0].split())
-    test.FRAMES = 1150
-    file_handle.close()
-    test.background_perform(args,15,16,35,4)
+        gaussian = cv2.GaussianBlur(frame,(3,3),0)
+        fgMask = backSub2.apply(gaussian)
+        closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
+        opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
+
+        if i >= eval_start and i <= eval_end:
+            pred_name = "gt" + str(i).zfill(6) + ".png"
+            cv2.imwrite(args.out_path + pred_name, opening)
+
 
 
 def dynamic_bgs(args):
