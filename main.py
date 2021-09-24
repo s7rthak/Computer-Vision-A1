@@ -71,16 +71,19 @@ def illumination_bgs(args):
 
 
 def jitter_bgs(args):
-     os.makedirs(args.out_path, exist_ok=True)
-     file_handle = open(args.eval_frames, 'r')
-     lines_list = file_handle.readlines()
-     
-     eval_start, eval_end = (int(val) for val in lines_list[0].split())
-     file_handle.close()
-     backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
-     backSub2 = cv2.createBackgroundSubtractorKNN()
-     
-     for i in range(1, BASELINE_FRAMES+1):
+    
+    os.makedirs(args.out_path, exist_ok=True)
+
+    file_handle = open(args.eval_frames, 'r')
+    lines_list = file_handle.readlines()
+
+    eval_start, eval_end = (int(val) for val in lines_list[0].split())
+    file_handle.close()
+
+    backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
+    backSub2 = cv2.createBackgroundSubtractorKNN()
+
+    for i in range(1, JITTER_FRAMES +1):
         frame_name = "in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
 
@@ -103,7 +106,7 @@ def dynamic_bgs(args):
     test.eval_start, test.eval_end = (int(val) for val in lines_list[0].split())
     test.FRAMES = 1189
     file_handle.close()
-    test.background_perform(args,15,16,35,4)
+    test.background_perform2(args,15,16,55,1)
 
 
 def ptz_bgs(args):
@@ -118,7 +121,7 @@ def ptz_bgs(args):
 
 
 def main(args):
-    if args.category not in "bijdp":
+    if args.category not in "bijmp":
         raise ValueError("category should be one of b/i/j/m/p - Found: %s"%args.category)
     FUNCTION_MAPPER = {
             "b": baseline_bgs,
