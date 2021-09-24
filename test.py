@@ -54,7 +54,6 @@ def background_perform(args,R1,rand_samples_1,boot_strap_1,n_min_1):
 
 
     for i in range(1, FRAMES+1):
-        print(i)
         frame_name = "in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
         #frame = cv2.resize(frame, (320,240))
@@ -104,7 +103,6 @@ def background_perform2(args,R1,rand_samples_1,boot_strap_1,n_min_1):
 
 
     for i in range(1, FRAMES+1):
-        print(i)
         frame_name = "in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
         #frame = cv2.resize(frame, (320,240))
