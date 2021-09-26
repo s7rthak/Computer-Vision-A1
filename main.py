@@ -80,15 +80,24 @@ def jitter_bgs(args):
     eval_start, eval_end = (int(val) for val in lines_list[0].split())
     file_handle.close()
 
-    backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
-    backSub2 = cv2.createBackgroundSubtractorKNN()
+    backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=8)
+    backSub2 = cv2.createBackgroundSubtractorKNN(dist2Threshold=800.0)
 
     for i in range(1, JITTER_FRAMES +1):
+        print(i)
         frame_name = "in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
 
         gaussian = cv2.GaussianBlur(frame,(3,3),0)
-        fgMask = backSub2.apply(gaussian)
+        fgMask_mog = backSub.apply(gaussian)
+        fgMask_knn = backSub2.apply(gaussian)
+        fgMask = fgMask_knn
+
+        cv2.imshow("frame", fgMask)
+        keyboard = cv2.waitKey(30)
+        if keyboard == 'q' or keyboard == 27:
+            break
+
         closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
         opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
 
@@ -117,7 +126,7 @@ def ptz_bgs(args):
     test.eval_start, test.eval_end = (int(val) for val in lines_list[0].split())
     test.FRAMES = 1130
     file_handle.close()
-    test.background_perform(args,15,16,35,4)
+    test.ptz_bg_model(args,50,2,35,5)
 
 
 def main(args):
