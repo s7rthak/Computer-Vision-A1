@@ -33,29 +33,38 @@ dataset_dir = "COL780-A1-Data/"
 kernel = np.ones((7,7),np.uint8)
 
 def baseline_bgs(args):
-    os.makedirs(args.out_path, exist_ok=True)
+    # os.makedirs(args.out_path, exist_ok=True)
 
+    # file_handle = open(args.eval_frames, 'r')
+    # lines_list = file_handle.readlines()
+
+    # eval_start, eval_end = (int(val) for val in lines_list[0].split())
+    # file_handle.close()
+
+    # backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
+    # backSub2 = cv2.createBackgroundSubtractorKNN()
+
+    # for i in range(1, BASELINE_FRAMES+1):
+    #     frame_name = "in" + str(i).zfill(6) + ".jpg"
+    #     frame = cv2.imread(args.inp_path + frame_name)
+
+    #     gaussian = cv2.GaussianBlur(frame,(3,3),0)
+    #     fgMask = backSub2.apply(gaussian)
+    #     closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, np.ones((7,7),np.uint8))
+    #     opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, np.ones((7,7),np.uint8))
+
+    #     if i >= eval_start and i <= eval_end:
+    #         pred_name = "gt" + str(i).zfill(6) + ".png"
+    #         cv2.imwrite(args.out_path + pred_name, opening)
+
+    os.makedirs(args.out_path, exist_ok=True)
     file_handle = open(args.eval_frames, 'r')
     lines_list = file_handle.readlines()
 
-    eval_start, eval_end = (int(val) for val in lines_list[0].split())
+    test.eval_start, test.eval_end = (int(val) for val in lines_list[0].split())
+    test.FRAMES = len(os.listdir(args.inp_path))
     file_handle.close()
-
-    backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=15, detectShadows=False)
-    backSub2 = cv2.createBackgroundSubtractorKNN()
-
-    for i in range(1, BASELINE_FRAMES+1):
-        frame_name = "in" + str(i).zfill(6) + ".jpg"
-        frame = cv2.imread(args.inp_path + frame_name)
-
-        gaussian = cv2.GaussianBlur(frame,(3,3),0)
-        fgMask = backSub2.apply(gaussian)
-        closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
-        opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
-
-        if i >= eval_start and i <= eval_end:
-            pred_name = "gt" + str(i).zfill(6) + ".png"
-            cv2.imwrite(args.out_path + pred_name, opening)
+    test.static_bg(args,30,16,35,2)
 
 
 def illumination_bgs(args):
@@ -64,7 +73,7 @@ def illumination_bgs(args):
     lines_list = file_handle.readlines()
 
     test.eval_start, test.eval_end = (int(val) for val in lines_list[0].split())
-    test.FRAMES = 301
+    test.FRAMES = len(os.listdir(args.inp_path))
     file_handle.close()
     test.background_perform(args,15,16,35,4)
 
@@ -83,7 +92,9 @@ def jitter_bgs(args):
     backSub = cv2.createBackgroundSubtractorMOG2(varThreshold=8)
     backSub2 = cv2.createBackgroundSubtractorKNN(dist2Threshold=800.0)
 
-    for i in range(1, JITTER_FRAMES +1):
+    frames = len(os.listdir(args.inp_path))
+
+    for i in range(1, frames+1):
         print(i)
         frame_name = "in" + str(i).zfill(6) + ".jpg"
         frame = cv2.imread(args.inp_path + frame_name)
@@ -92,11 +103,6 @@ def jitter_bgs(args):
         fgMask_mog = backSub.apply(gaussian)
         fgMask_knn = backSub2.apply(gaussian)
         fgMask = fgMask_knn
-
-        cv2.imshow("frame", fgMask)
-        keyboard = cv2.waitKey(30)
-        if keyboard == 'q' or keyboard == 27:
-            break
 
         closing = cv2.morphologyEx(fgMask, cv2.MORPH_CLOSE, kernel)
         opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
@@ -113,7 +119,7 @@ def dynamic_bgs(args):
     lines_list = file_handle.readlines()
 
     test.eval_start, test.eval_end = (int(val) for val in lines_list[0].split())
-    test.FRAMES = 1189
+    test.FRAMES = len(os.listdir(args.inp_path))
     file_handle.close()
     test.background_perform2(args,15,16,55,1)
 
@@ -124,7 +130,7 @@ def ptz_bgs(args):
     lines_list = file_handle.readlines()
 
     test.eval_start, test.eval_end = (int(val) for val in lines_list[0].split())
-    test.FRAMES = 1130
+    test.FRAMES = len(os.listdir(args.inp_path))
     file_handle.close()
     test.ptz_bg_model(args,50,2,35,5)
 
